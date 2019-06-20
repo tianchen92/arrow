@@ -180,7 +180,6 @@
                   <include>io.grpc:*</include>
                   <include>com.google.protobuf:*</include>
                   <include>com.google.guava:*</include>
-                  <include>com.google.flatbuffers:*</include>
                 </includes>
               </artifactSet>
               <relocations>
@@ -191,10 +190,6 @@
                 <relocation>
                   <pattern>com.google.common</pattern>
                   <shadedPattern>arrow.flight.com.google.common</shadedPattern>
-                </relocation>
-                <relocation>
-                  <pattern>com.google.flatbuffers</pattern>
-                  <shadedPattern>arrow.flight.com.google.flatbuffers</shadedPattern>
                 </relocation>
               </relocations>
               <transformers>
