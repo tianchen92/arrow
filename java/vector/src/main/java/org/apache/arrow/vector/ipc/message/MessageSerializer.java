@@ -34,7 +34,7 @@ import org.apache.arrow.vector.ipc.ReadChannel;
 import org.apache.arrow.vector.ipc.WriteChannel;
 import org.apache.arrow.vector.types.pojo.Schema;
 
-import com.google.flatbuffers.FlatBufferBuilder;
+import arrow.format.com.google.flatbuffers.FlatBufferBuilder;
 
 import io.netty.buffer.ArrowBuf;
 

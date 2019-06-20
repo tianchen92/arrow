@@ -47,8 +47,9 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
-import com.google.flatbuffers.FlatBufferBuilder;
 import com.google.protobuf.ByteString;
+
+import arrow.format.com.google.flatbuffers.FlatBufferBuilder;
 
 @org.junit.Ignore
 public class TestPerf {

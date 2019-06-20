@@ -42,7 +42,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.flatbuffers.FlatBufferBuilder;
+
+import arrow.format.com.google.flatbuffers.FlatBufferBuilder;
 
 /**
  * A POJO abstraction for the Flatbuffer description of Vector Type.

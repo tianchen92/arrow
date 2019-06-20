@@ -19,7 +19,7 @@ package org.apache.arrow.vector.ipc.message;
 
 import org.apache.arrow.flatbuf.DictionaryBatch;
 
-import com.google.flatbuffers.FlatBufferBuilder;
+import arrow.format.com.google.flatbuffers.FlatBufferBuilder;
 
 /**
  * POJO wrapper around a Dictionary Batch IPC messages

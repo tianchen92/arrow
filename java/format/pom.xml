@@ -170,6 +170,9 @@
             <goal>shade</goal>
           </goals>
           <configuration>
+            <createSourcesJar>true</createSourcesJar>
+            <shadeSourcesContent>true</shadeSourcesContent>
+            <createDependencyReducedPom>false</createDependencyReducedPom>
             <artifactSet>
               <includes>
                 <include>com.google.flatbuffers:*</include>

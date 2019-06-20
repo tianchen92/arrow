@@ -48,7 +48,7 @@ import org.apache.arrow.vector.types.pojo.FieldType;
 import org.apache.arrow.vector.types.pojo.Schema;
 import org.junit.Test;
 
-import com.google.flatbuffers.FlatBufferBuilder;
+import arrow.format.com.google.flatbuffers.FlatBufferBuilder;
 
 /**
  * Test conversion between Flatbuf and Pojo field representations.

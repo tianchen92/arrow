@@ -43,7 +43,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import com.google.flatbuffers.FlatBufferBuilder;
+
+import arrow.format.com.google.flatbuffers.FlatBufferBuilder;
 
 /**
  * An Arrow Schema.

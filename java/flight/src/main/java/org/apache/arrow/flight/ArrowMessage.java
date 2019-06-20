@@ -43,11 +43,12 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.io.ByteStreams;
-import com.google.flatbuffers.FlatBufferBuilder;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.CodedInputStream;
 import com.google.protobuf.CodedOutputStream;
 import com.google.protobuf.WireFormat;
+
+import arrow.format.com.google.flatbuffers.FlatBufferBuilder;
 
 import io.grpc.Drainable;
 import io.grpc.MethodDescriptor;
