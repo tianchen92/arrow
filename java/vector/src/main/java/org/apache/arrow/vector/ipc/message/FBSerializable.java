@@ -17,7 +17,7 @@
 
 package org.apache.arrow.vector.ipc.message;
 
-import org.apache.arrow.shaded.com.google.flatbuffers.FlatBufferBuilder;
+import org.apache.arrow.FlatBufferBuilderWrapper;
 
 /**
  * Interface for serializing to FlatBuffers.
@@ -26,5 +26,5 @@ public interface FBSerializable {
   /**
    * Returns the number of bytes taken to serialize the data in builder after writing to it.
    */
-  int writeTo(FlatBufferBuilder builder);
+  int writeTo(FlatBufferBuilderWrapper builder);
 }

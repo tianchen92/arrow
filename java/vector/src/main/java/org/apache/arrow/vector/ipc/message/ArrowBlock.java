@@ -17,9 +17,8 @@
 
 package org.apache.arrow.vector.ipc.message;
 
+import org.apache.arrow.FlatBufferBuilderWrapper;
 import org.apache.arrow.flatbuf.Block;
-
-import org.apache.arrow.shaded.com.google.flatbuffers.FlatBufferBuilder;
 
 /** Metadata for an arrow message in a channel. */
 public class ArrowBlock implements FBSerializable {
@@ -55,8 +54,8 @@ public class ArrowBlock implements FBSerializable {
   }
 
   @Override
-  public int writeTo(FlatBufferBuilder builder) {
-    return Block.createBlock(builder, offset, metadataLength, bodyLength);
+  public int writeTo(FlatBufferBuilderWrapper builderWrapper) {
+    return Block.createBlock(builderWrapper.getInternalBuilder(), offset, metadataLength, bodyLength);
   }
 
   @Override

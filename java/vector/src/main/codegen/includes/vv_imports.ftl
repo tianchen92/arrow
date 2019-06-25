@@ -18,7 +18,7 @@
 import static org.apache.arrow.util.Preconditions.checkArgument;
 import static org.apache.arrow.util.Preconditions.checkState;
 
-import org.apache.arrow.shaded.com.google.flatbuffers.FlatBufferBuilder;
+import org.apache.arrow.FlatBufferBuilderWrapper;
 
 import io.netty.buffer.*;
 

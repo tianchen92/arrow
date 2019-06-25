@@ -17,9 +17,8 @@
 
 package org.apache.arrow.vector.ipc.message;
 
+import org.apache.arrow.FlatBufferBuilderWrapper;
 import org.apache.arrow.flatbuf.DictionaryBatch;
-
-import org.apache.arrow.shaded.com.google.flatbuffers.FlatBufferBuilder;
 
 /**
  * POJO wrapper around a Dictionary Batch IPC messages
@@ -44,12 +43,12 @@ public class ArrowDictionaryBatch implements ArrowMessage {
   }
 
   @Override
-  public int writeTo(FlatBufferBuilder builder) {
-    int dataOffset = dictionary.writeTo(builder);
-    DictionaryBatch.startDictionaryBatch(builder);
-    DictionaryBatch.addId(builder, dictionaryId);
-    DictionaryBatch.addData(builder, dataOffset);
-    return DictionaryBatch.endDictionaryBatch(builder);
+  public int writeTo(FlatBufferBuilderWrapper builderWrapper) {
+    int dataOffset = dictionary.writeTo(builderWrapper);
+    DictionaryBatch.startDictionaryBatch(builderWrapper.getInternalBuilder());
+    DictionaryBatch.addId(builderWrapper.getInternalBuilder(), dictionaryId);
+    DictionaryBatch.addData(builderWrapper.getInternalBuilder(), dataOffset);
+    return DictionaryBatch.endDictionaryBatch(builderWrapper.getInternalBuilder());
   }
 
   @Override

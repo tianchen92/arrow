@@ -22,6 +22,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.arrow.FlatBufferBuilderWrapper;
 import org.apache.arrow.flatbuf.Buffer;
 import org.apache.arrow.flatbuf.DictionaryBatch;
 import org.apache.arrow.flatbuf.FieldNode;
@@ -30,7 +31,6 @@ import org.apache.arrow.flatbuf.MessageHeader;
 import org.apache.arrow.flatbuf.MetadataVersion;
 import org.apache.arrow.flatbuf.RecordBatch;
 import org.apache.arrow.memory.BufferAllocator;
-import org.apache.arrow.shaded.com.google.flatbuffers.FlatBufferBuilder;
 import org.apache.arrow.vector.ipc.ReadChannel;
 import org.apache.arrow.vector.ipc.WriteChannel;
 import org.apache.arrow.vector.types.pojo.Schema;
@@ -119,9 +119,9 @@ public class MessageSerializer {
     long start = out.getCurrentPosition();
     assert start % 8 == 0;
 
-    FlatBufferBuilder builder = new FlatBufferBuilder();
-    int schemaOffset = schema.getSchema(builder);
-    ByteBuffer serializedMessage = serializeMessage(builder, MessageHeader.Schema, schemaOffset, 0);
+    FlatBufferBuilderWrapper builderWrapper = new FlatBufferBuilderWrapper();
+    int schemaOffset = schema.getSchema(builderWrapper);
+    ByteBuffer serializedMessage = serializeMessage(builderWrapper, MessageHeader.Schema, schemaOffset, 0);
 
     int messageLength = serializedMessage.remaining();
 
@@ -174,10 +174,10 @@ public class MessageSerializer {
     int bodyLength = batch.computeBodyLength();
     assert bodyLength % 8 == 0;
 
-    FlatBufferBuilder builder = new FlatBufferBuilder();
-    int batchOffset = batch.writeTo(builder);
+    FlatBufferBuilderWrapper builderWrapper = new FlatBufferBuilderWrapper();
+    int batchOffset = batch.writeTo(builderWrapper);
 
-    ByteBuffer serializedMessage = serializeMessage(builder, MessageHeader.RecordBatch, batchOffset, bodyLength);
+    ByteBuffer serializedMessage = serializeMessage(builderWrapper, MessageHeader.RecordBatch, batchOffset, bodyLength);
 
     int metadataLength = serializedMessage.remaining();
 
@@ -352,10 +352,11 @@ public class MessageSerializer {
     int bodyLength = batch.computeBodyLength();
     assert bodyLength % 8 == 0;
 
-    FlatBufferBuilder builder = new FlatBufferBuilder();
-    int batchOffset = batch.writeTo(builder);
+    FlatBufferBuilderWrapper builderWrapper = new FlatBufferBuilderWrapper();
+    int batchOffset = batch.writeTo(builderWrapper);
 
-    ByteBuffer serializedMessage = serializeMessage(builder, MessageHeader.DictionaryBatch, batchOffset, bodyLength);
+    ByteBuffer serializedMessage =
+        serializeMessage(builderWrapper, MessageHeader.DictionaryBatch, batchOffset, bodyLength);
 
     int metadataLength = serializedMessage.remaining();
 
@@ -502,24 +503,24 @@ public class MessageSerializer {
   /**
    * Serializes a message header.
    *
-   * @param builder      to write the flatbuf to
+   * @param builderWrapper      to write the flatbuf to
    * @param headerType   headerType field
    * @param headerOffset header offset field
    * @param bodyLength   body length field
    * @return the corresponding ByteBuffer
    */
   public static ByteBuffer serializeMessage(
-      FlatBufferBuilder builder,
+      FlatBufferBuilderWrapper builderWrapper,
       byte headerType,
       int headerOffset,
       int bodyLength) {
-    Message.startMessage(builder);
-    Message.addHeaderType(builder, headerType);
-    Message.addHeader(builder, headerOffset);
-    Message.addVersion(builder, MetadataVersion.V4);
-    Message.addBodyLength(builder, bodyLength);
-    builder.finish(Message.endMessage(builder));
-    return builder.dataBuffer();
+    Message.startMessage(builderWrapper.getInternalBuilder());
+    Message.addHeaderType(builderWrapper.getInternalBuilder(), headerType);
+    Message.addHeader(builderWrapper.getInternalBuilder(), headerOffset);
+    Message.addVersion(builderWrapper.getInternalBuilder(), MetadataVersion.V4);
+    Message.addBodyLength(builderWrapper.getInternalBuilder(), bodyLength);
+    builderWrapper.getInternalBuilder().finish(Message.endMessage(builderWrapper.getInternalBuilder()));
+    return builderWrapper.getInternalBuilder().dataBuffer();
   }
 
   /**

@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.WritableByteChannel;
 
-import org.apache.arrow.shaded.com.google.flatbuffers.FlatBufferBuilder;
+import org.apache.arrow.FlatBufferBuilderWrapper;
 import org.apache.arrow.vector.ipc.message.FBSerializable;
 import org.apache.arrow.vector.ipc.message.MessageSerializer;
 import org.slf4j.Logger;
@@ -124,9 +124,9 @@ public class WriteChannel implements AutoCloseable {
    * Serializes writer to a ByteBuffer.
    */
   public static ByteBuffer serialize(FBSerializable writer) {
-    FlatBufferBuilder builder = new FlatBufferBuilder();
-    int root = writer.writeTo(builder);
-    builder.finish(root);
-    return builder.dataBuffer();
+    FlatBufferBuilderWrapper builderWrapper = new FlatBufferBuilderWrapper();
+    int root = writer.writeTo(builderWrapper);
+    builderWrapper.getInternalBuilder().finish(root);
+    return builderWrapper.getInternalBuilder().dataBuffer();
   }
 }

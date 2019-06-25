@@ -31,8 +31,8 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import org.apache.arrow.FlatBufferBuilderWrapper;
 import org.apache.arrow.flatbuf.KeyValue;
-import org.apache.arrow.shaded.com.google.flatbuffers.FlatBufferBuilder;
 import org.apache.arrow.util.Collections2;
 import org.apache.arrow.util.Preconditions;
 
@@ -152,38 +152,40 @@ public class Schema {
   /**
    *  Adds this schema to the builder returning the size of the builder after adding.
    */
-  public int getSchema(FlatBufferBuilder builder) {
+  public int getSchema(FlatBufferBuilderWrapper builderWrapper) {
     int[] fieldOffsets = new int[fields.size()];
     for (int i = 0; i < fields.size(); i++) {
-      fieldOffsets[i] = fields.get(i).getField(builder);
+      fieldOffsets[i] = fields.get(i).getField(builderWrapper);
     }
-    int fieldsOffset = org.apache.arrow.flatbuf.Schema.createFieldsVector(builder, fieldOffsets);
+    int fieldsOffset = org.apache.arrow.flatbuf.Schema
+        .createFieldsVector(builderWrapper.getInternalBuilder(), fieldOffsets);
     int[] metadataOffsets = new int[metadata.size()];
     Iterator<Entry<String, String>> metadataIterator = metadata.entrySet().iterator();
     for (int i = 0; i < metadataOffsets.length; i++) {
       Entry<String, String> kv = metadataIterator.next();
-      int keyOffset = builder.createString(kv.getKey());
-      int valueOffset = builder.createString(kv.getValue());
-      KeyValue.startKeyValue(builder);
-      KeyValue.addKey(builder, keyOffset);
-      KeyValue.addValue(builder, valueOffset);
-      metadataOffsets[i] = KeyValue.endKeyValue(builder);
+      int keyOffset = builderWrapper.getInternalBuilder().createString(kv.getKey());
+      int valueOffset = builderWrapper.getInternalBuilder().createString(kv.getValue());
+      KeyValue.startKeyValue(builderWrapper.getInternalBuilder());
+      KeyValue.addKey(builderWrapper.getInternalBuilder(), keyOffset);
+      KeyValue.addValue(builderWrapper.getInternalBuilder(), valueOffset);
+      metadataOffsets[i] = KeyValue.endKeyValue(builderWrapper.getInternalBuilder());
     }
-    int metadataOffset = org.apache.arrow.flatbuf.Field.createCustomMetadataVector(builder, metadataOffsets);
-    org.apache.arrow.flatbuf.Schema.startSchema(builder);
-    org.apache.arrow.flatbuf.Schema.addFields(builder, fieldsOffset);
-    org.apache.arrow.flatbuf.Schema.addCustomMetadata(builder, metadataOffset);
-    return org.apache.arrow.flatbuf.Schema.endSchema(builder);
+    int metadataOffset =
+        org.apache.arrow.flatbuf.Field.createCustomMetadataVector(builderWrapper.getInternalBuilder(), metadataOffsets);
+    org.apache.arrow.flatbuf.Schema.startSchema(builderWrapper.getInternalBuilder());
+    org.apache.arrow.flatbuf.Schema.addFields(builderWrapper.getInternalBuilder(), fieldsOffset);
+    org.apache.arrow.flatbuf.Schema.addCustomMetadata(builderWrapper.getInternalBuilder(), metadataOffset);
+    return org.apache.arrow.flatbuf.Schema.endSchema(builderWrapper.getInternalBuilder());
   }
 
   /**
    * Returns the serialized flatbuffer representation of this schema.
    */
   public byte[] toByteArray() {
-    FlatBufferBuilder builder = new FlatBufferBuilder();
-    int schemaOffset = this.getSchema(builder);
-    builder.finish(schemaOffset);
-    ByteBuffer bb = builder.dataBuffer();
+    FlatBufferBuilderWrapper builderWrapper = new FlatBufferBuilderWrapper();
+    int schemaOffset = this.getSchema(builderWrapper);
+    builderWrapper.getInternalBuilder().finish(schemaOffset);
+    ByteBuffer bb = builderWrapper.getInternalBuilder().dataBuffer();
     byte[] bytes = new byte[bb.remaining()];
     bb.get(bytes);
     return bytes;

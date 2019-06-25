@@ -15,13 +15,15 @@
  * limitations under the License.
  */
 
+import org.apache.arrow.FlatBufferBuilderWrapper;
+
 <@pp.dropOutputFile />
 <@pp.changeOutputFile name="/org/apache/arrow/vector/types/pojo/ArrowType.java" />
 <#include "/@includes/license.ftl" />
 
 package org.apache.arrow.vector.types.pojo;
 
-import org.apache.arrow.shaded.com.google.flatbuffers.FlatBufferBuilder;
+import org.apache.arrow.FlatBufferBuilderWrapper;
 
 import java.util.Objects;
 
@@ -95,7 +97,7 @@ public abstract class ArrowType {
   public abstract ArrowTypeID getTypeID();
   @JsonIgnore
   public abstract boolean isComplex();
-  public abstract int getType(FlatBufferBuilder builder);
+  public abstract int getType(FlatBufferBuilderWrapper builder);
   public abstract <T> T accept(ArrowTypeVisitor<T> visitor);
 
   /**
@@ -191,26 +193,26 @@ public abstract class ArrowType {
     }
 
     @Override
-    public int getType(FlatBufferBuilder builder) {
+    public int getType(FlatBufferBuilderWrapper builderWrapper) {
       <#list type.fields as field>
       <#if field.type == "String">
-      int ${field.name} = this.${field.name} == null ? -1 : builder.createString(this.${field.name});
+      int ${field.name} = this.${field.name} == null ? -1 : builderWrapper.getInternalBuilder().createString(this.${field.name});
       </#if>
       <#if field.type == "int[]">
-      int ${field.name} = this.${field.name} == null ? -1 : org.apache.arrow.flatbuf.${type.name}.create${field.name?cap_first}Vector(builder, this.${field.name});
+      int ${field.name} = this.${field.name} == null ? -1 : org.apache.arrow.flatbuf.${type.name}.create${field.name?cap_first}Vector(builderWrapper.getInternalBuilder(), this.${field.name});
       </#if>
       </#list>
-      org.apache.arrow.flatbuf.${type.name}.start${type.name}(builder);
+      org.apache.arrow.flatbuf.${type.name}.start${type.name}(builderWrapper.getInternalBuilder());
       <#list type.fields as field>
       <#if field.type == "String" || field.type == "int[]">
       if (this.${field.name} != null) {
-        org.apache.arrow.flatbuf.${type.name}.add${field.name?cap_first}(builder, ${field.name});
+        org.apache.arrow.flatbuf.${type.name}.add${field.name?cap_first}(builderWrapper.getInternalBuilder(), ${field.name});
       }
       <#else>
-      org.apache.arrow.flatbuf.${type.name}.add${field.name?cap_first}(builder, this.${field.name}<#if field.valueType??>.getFlatbufID()</#if>);
+      org.apache.arrow.flatbuf.${type.name}.add${field.name?cap_first}(builderWrapper.getInternalBuilder(), this.${field.name}<#if field.valueType??>.getFlatbufID()</#if>);
       </#if>
       </#list>
-      return org.apache.arrow.flatbuf.${type.name}.end${type.name}(builder);
+      return org.apache.arrow.flatbuf.${type.name}.end${type.name}(builderWrapper.getInternalBuilder());
     }
 
     public String toString() {
@@ -279,8 +281,8 @@ public abstract class ArrowType {
     }
 
     @Override
-    public int getType(FlatBufferBuilder builder) {
-      return storageType().getType(builder);
+    public int getType(FlatBufferBuilderWrapper builderWrapper) {
+      return storageType().getType(builderWrapper);
     }
 
     public String toString() {

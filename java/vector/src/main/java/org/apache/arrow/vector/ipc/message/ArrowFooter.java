@@ -22,9 +22,9 @@ import static org.apache.arrow.vector.ipc.message.FBSerializables.writeAllStruct
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.arrow.FlatBufferBuilderWrapper;
 import org.apache.arrow.flatbuf.Block;
 import org.apache.arrow.flatbuf.Footer;
-import org.apache.arrow.shaded.com.google.flatbuffers.FlatBufferBuilder;
 import org.apache.arrow.vector.types.pojo.Schema;
 
 /** Footer metadata for the arrow file format. */
@@ -96,17 +96,17 @@ public class ArrowFooter implements FBSerializable {
   }
 
   @Override
-  public int writeTo(FlatBufferBuilder builder) {
-    int schemaIndex = schema.getSchema(builder);
-    Footer.startDictionariesVector(builder, dictionaries.size());
-    int dicsOffset = writeAllStructsToVector(builder, dictionaries);
-    Footer.startRecordBatchesVector(builder, recordBatches.size());
-    int rbsOffset = writeAllStructsToVector(builder, recordBatches);
-    Footer.startFooter(builder);
-    Footer.addSchema(builder, schemaIndex);
-    Footer.addDictionaries(builder, dicsOffset);
-    Footer.addRecordBatches(builder, rbsOffset);
-    return Footer.endFooter(builder);
+  public int writeTo(FlatBufferBuilderWrapper builderWrapper) {
+    int schemaIndex = schema.getSchema(builderWrapper);
+    Footer.startDictionariesVector(builderWrapper.getInternalBuilder(), dictionaries.size());
+    int dicsOffset = writeAllStructsToVector(builderWrapper, dictionaries);
+    Footer.startRecordBatchesVector(builderWrapper.getInternalBuilder(), recordBatches.size());
+    int rbsOffset = writeAllStructsToVector(builderWrapper, recordBatches);
+    Footer.startFooter(builderWrapper.getInternalBuilder());
+    Footer.addSchema(builderWrapper.getInternalBuilder(), schemaIndex);
+    Footer.addDictionaries(builderWrapper.getInternalBuilder(), dicsOffset);
+    Footer.addRecordBatches(builderWrapper.getInternalBuilder(), rbsOffset);
+    return Footer.endFooter(builderWrapper.getInternalBuilder());
   }
 
   @Override

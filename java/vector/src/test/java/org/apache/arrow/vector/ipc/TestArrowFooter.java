@@ -25,8 +25,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.arrow.FlatBufferBuilderWrapper;
 import org.apache.arrow.flatbuf.Footer;
-import org.apache.arrow.shaded.com.google.flatbuffers.FlatBufferBuilder;
 import org.apache.arrow.vector.ipc.message.ArrowBlock;
 import org.apache.arrow.vector.ipc.message.ArrowFooter;
 import org.apache.arrow.vector.types.pojo.ArrowType;
@@ -56,10 +56,10 @@ public class TestArrowFooter {
 
 
   private ArrowFooter roundTrip(ArrowFooter footer) {
-    FlatBufferBuilder builder = new FlatBufferBuilder();
-    int i = footer.writeTo(builder);
-    builder.finish(i);
-    ByteBuffer dataBuffer = builder.dataBuffer();
+    FlatBufferBuilderWrapper builderWrapper = new FlatBufferBuilderWrapper();
+    int i = footer.writeTo(builderWrapper);
+    builderWrapper.getInternalBuilder().finish(i);
+    ByteBuffer dataBuffer = builderWrapper.getInternalBuilder().dataBuffer();
     ArrowFooter newFooter = new ArrowFooter(Footer.getRootAsFooter(dataBuffer));
     return newFooter;
   }

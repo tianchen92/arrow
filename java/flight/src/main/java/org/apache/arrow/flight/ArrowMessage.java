@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.arrow.FlatBufferBuilderWrapper;
 import org.apache.arrow.flatbuf.Message;
 import org.apache.arrow.flatbuf.MessageHeader;
 import org.apache.arrow.flatbuf.RecordBatch;
@@ -34,7 +35,6 @@ import org.apache.arrow.flight.grpc.GetReadableBuffer;
 import org.apache.arrow.flight.impl.Flight.FlightData;
 import org.apache.arrow.flight.impl.Flight.FlightDescriptor;
 import org.apache.arrow.memory.BufferAllocator;
-import org.apache.arrow.shaded.com.google.flatbuffers.FlatBufferBuilder;
 import org.apache.arrow.util.AutoCloseables;
 import org.apache.arrow.vector.ipc.message.ArrowRecordBatch;
 import org.apache.arrow.vector.ipc.message.MessageSerializer;
@@ -117,9 +117,10 @@ class ArrowMessage implements AutoCloseable {
   private final List<ArrowBuf> bufs;
 
   public ArrowMessage(FlightDescriptor descriptor, Schema schema) {
-    FlatBufferBuilder builder = new FlatBufferBuilder();
-    int schemaOffset = schema.getSchema(builder);
-    ByteBuffer serializedMessage = MessageSerializer.serializeMessage(builder, MessageHeader.Schema, schemaOffset, 0);
+    FlatBufferBuilderWrapper builderWrapper = new FlatBufferBuilderWrapper();
+    int schemaOffset = schema.getSchema(builderWrapper);
+    ByteBuffer serializedMessage =
+        MessageSerializer.serializeMessage(builderWrapper, MessageHeader.Schema, schemaOffset, 0);
     serializedMessage = serializedMessage.slice();
     message = Message.getRootAsMessage(serializedMessage);
     bufs = ImmutableList.of();
@@ -127,10 +128,10 @@ class ArrowMessage implements AutoCloseable {
   }
 
   public ArrowMessage(ArrowRecordBatch batch) {
-    FlatBufferBuilder builder = new FlatBufferBuilder();
-    int batchOffset = batch.writeTo(builder);
-    ByteBuffer serializedMessage = MessageSerializer.serializeMessage(builder, MessageHeader.RecordBatch, batchOffset,
-        batch.computeBodyLength());
+    FlatBufferBuilderWrapper builderWrapper = new FlatBufferBuilderWrapper();
+    int batchOffset = batch.writeTo(builderWrapper);
+    ByteBuffer serializedMessage = MessageSerializer.serializeMessage(builderWrapper,
+        MessageHeader.RecordBatch, batchOffset, batch.computeBodyLength());
     serializedMessage = serializedMessage.slice();
     this.message = Message.getRootAsMessage(serializedMessage);
     this.bufs = ImmutableList.copyOf(batch.getBuffers());

@@ -23,9 +23,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.arrow.FlatBufferBuilderWrapper;
 import org.apache.arrow.flatbuf.RecordBatch;
 import org.apache.arrow.memory.BufferAllocator;
-import org.apache.arrow.shaded.com.google.flatbuffers.FlatBufferBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -155,16 +155,16 @@ public class ArrowRecordBatch implements ArrowMessage {
   }
 
   @Override
-  public int writeTo(FlatBufferBuilder builder) {
-    RecordBatch.startNodesVector(builder, nodes.size());
-    int nodesOffset = FBSerializables.writeAllStructsToVector(builder, nodes);
-    RecordBatch.startBuffersVector(builder, buffers.size());
-    int buffersOffset = FBSerializables.writeAllStructsToVector(builder, buffersLayout);
-    RecordBatch.startRecordBatch(builder);
-    RecordBatch.addLength(builder, length);
-    RecordBatch.addNodes(builder, nodesOffset);
-    RecordBatch.addBuffers(builder, buffersOffset);
-    return RecordBatch.endRecordBatch(builder);
+  public int writeTo(FlatBufferBuilderWrapper builderWrapper) {
+    RecordBatch.startNodesVector(builderWrapper.getInternalBuilder(), nodes.size());
+    int nodesOffset = FBSerializables.writeAllStructsToVector(builderWrapper, nodes);
+    RecordBatch.startBuffersVector(builderWrapper.getInternalBuilder(), buffers.size());
+    int buffersOffset = FBSerializables.writeAllStructsToVector(builderWrapper, buffersLayout);
+    RecordBatch.startRecordBatch(builderWrapper.getInternalBuilder());
+    RecordBatch.addLength(builderWrapper.getInternalBuilder(), length);
+    RecordBatch.addNodes(builderWrapper.getInternalBuilder(), nodesOffset);
+    RecordBatch.addBuffers(builderWrapper.getInternalBuilder(), buffersOffset);
+    return RecordBatch.endRecordBatch(builderWrapper.getInternalBuilder());
   }
 
   @Override

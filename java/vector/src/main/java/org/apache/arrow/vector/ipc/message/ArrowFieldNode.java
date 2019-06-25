@@ -17,8 +17,8 @@
 
 package org.apache.arrow.vector.ipc.message;
 
+import org.apache.arrow.FlatBufferBuilderWrapper;
 import org.apache.arrow.flatbuf.FieldNode;
-import org.apache.arrow.shaded.com.google.flatbuffers.FlatBufferBuilder;
 
 /**
  * Metadata about Vectors/Arrays that is written to a channel.
@@ -41,8 +41,8 @@ public class ArrowFieldNode implements FBSerializable {
   }
 
   @Override
-  public int writeTo(FlatBufferBuilder builder) {
-    return FieldNode.createFieldNode(builder, (long) length, (long) nullCount);
+  public int writeTo(FlatBufferBuilderWrapper builderWrapper) {
+    return FieldNode.createFieldNode(builderWrapper.getInternalBuilder(), (long) length, (long) nullCount);
   }
 
   public int getNullCount() {

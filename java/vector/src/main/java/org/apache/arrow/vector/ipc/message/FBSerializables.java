@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.arrow.shaded.com.google.flatbuffers.FlatBufferBuilder;
+import org.apache.arrow.FlatBufferBuilderWrapper;
 
 /**
  * Utility methods for {@linkplain org.apache.arrow.vector.ipc.message.FBSerializable}s.
@@ -30,16 +30,18 @@ public class FBSerializables {
   private FBSerializables() {}
 
   /**
-   * Writes every element of all to builder and calls {@link FlatBufferBuilder#endVector()} afterwards.
+   * Writes every element of all to builder and calls
+   * {@link FlatBufferBuilderWrapper#getInternalBuilder()} afterwards.
    * Returns the number of result of calling endVector.
    */
-  public static int writeAllStructsToVector(FlatBufferBuilder builder, List<? extends FBSerializable> all) {
+  public static int writeAllStructsToVector(FlatBufferBuilderWrapper builderWrapper,
+      List<? extends FBSerializable> all) {
     // struct vectors have to be created in reverse order
     List<? extends FBSerializable> reversed = new ArrayList<>(all);
     Collections.reverse(reversed);
     for (FBSerializable element : reversed) {
-      element.writeTo(builder);
+      element.writeTo(builderWrapper);
     }
-    return builder.endVector();
+    return builderWrapper.getInternalBuilder().endVector();
   }
 }

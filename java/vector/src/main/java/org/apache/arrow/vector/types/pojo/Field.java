@@ -31,10 +31,10 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import org.apache.arrow.FlatBufferBuilderWrapper;
 import org.apache.arrow.flatbuf.KeyValue;
 import org.apache.arrow.flatbuf.Type;
 import org.apache.arrow.memory.BufferAllocator;
-import org.apache.arrow.shaded.com.google.flatbuffers.FlatBufferBuilder;
 import org.apache.arrow.vector.FieldVector;
 import org.apache.arrow.vector.TypeLayout;
 import org.apache.arrow.vector.types.pojo.ArrowType.ExtensionType;
@@ -185,49 +185,57 @@ public class Field {
   /**
    * Puts this object into <code>builder</code> and returns the length of the serialized flatbuffer.
    */
-  public int getField(FlatBufferBuilder builder) {
-    int nameOffset = name == null ? -1 : builder.createString(name);
-    int typeOffset = getType().getType(builder);
+  public int getField(FlatBufferBuilderWrapper builderWrapper) {
+    int nameOffset = name == null ? -1 : builderWrapper.getInternalBuilder().createString(name);
+    int typeOffset = getType().getType(builderWrapper);
     int dictionaryOffset = -1;
     DictionaryEncoding dictionary = getDictionary();
     if (dictionary != null) {
-      int dictionaryType = dictionary.getIndexType().getType(builder);
-      org.apache.arrow.flatbuf.DictionaryEncoding.startDictionaryEncoding(builder);
-      org.apache.arrow.flatbuf.DictionaryEncoding.addId(builder, dictionary.getId());
-      org.apache.arrow.flatbuf.DictionaryEncoding.addIsOrdered(builder, dictionary.isOrdered());
-      org.apache.arrow.flatbuf.DictionaryEncoding.addIndexType(builder, dictionaryType);
-      dictionaryOffset = org.apache.arrow.flatbuf.DictionaryEncoding.endDictionaryEncoding(builder);
+      int dictionaryType = dictionary.getIndexType().getType(builderWrapper);
+      org.apache.arrow.flatbuf.DictionaryEncoding
+          .startDictionaryEncoding(builderWrapper.getInternalBuilder());
+      org.apache.arrow.flatbuf.DictionaryEncoding
+          .addId(builderWrapper.getInternalBuilder(), dictionary.getId());
+      org.apache.arrow.flatbuf.DictionaryEncoding
+          .addIsOrdered(builderWrapper.getInternalBuilder(), dictionary.isOrdered());
+      org.apache.arrow.flatbuf.DictionaryEncoding
+          .addIndexType(builderWrapper.getInternalBuilder(), dictionaryType);
+      dictionaryOffset = org.apache.arrow.flatbuf.DictionaryEncoding
+          .endDictionaryEncoding(builderWrapper.getInternalBuilder());
     }
     int[] childrenData = new int[children.size()];
     for (int i = 0; i < children.size(); i++) {
-      childrenData[i] = children.get(i).getField(builder);
+      childrenData[i] = children.get(i).getField(builderWrapper);
     }
-    int childrenOffset = org.apache.arrow.flatbuf.Field.createChildrenVector(builder, childrenData);
+    int childrenOffset = org.apache.arrow.flatbuf.Field
+        .createChildrenVector(builderWrapper.getInternalBuilder(), childrenData);
     int[] metadataOffsets = new int[getMetadata().size()];
     Iterator<Entry<String, String>> metadataIterator = getMetadata().entrySet().iterator();
     for (int i = 0; i < metadataOffsets.length; i++) {
       Entry<String, String> kv = metadataIterator.next();
-      int keyOffset = builder.createString(kv.getKey());
-      int valueOffset = builder.createString(kv.getValue());
-      KeyValue.startKeyValue(builder);
-      KeyValue.addKey(builder, keyOffset);
-      KeyValue.addValue(builder, valueOffset);
-      metadataOffsets[i] = KeyValue.endKeyValue(builder);
+      int keyOffset = builderWrapper.getInternalBuilder().createString(kv.getKey());
+      int valueOffset = builderWrapper.getInternalBuilder().createString(kv.getValue());
+      KeyValue.startKeyValue(builderWrapper.getInternalBuilder());
+      KeyValue.addKey(builderWrapper.getInternalBuilder(), keyOffset);
+      KeyValue.addValue(builderWrapper.getInternalBuilder(), valueOffset);
+      metadataOffsets[i] = KeyValue.endKeyValue(builderWrapper.getInternalBuilder());
     }
-    int metadataOffset = org.apache.arrow.flatbuf.Field.createCustomMetadataVector(builder, metadataOffsets);
-    org.apache.arrow.flatbuf.Field.startField(builder);
+    int metadataOffset = org.apache.arrow.flatbuf.Field
+        .createCustomMetadataVector(builderWrapper.getInternalBuilder(), metadataOffsets);
+    org.apache.arrow.flatbuf.Field.startField(builderWrapper.getInternalBuilder());
     if (name != null) {
-      org.apache.arrow.flatbuf.Field.addName(builder, nameOffset);
+      org.apache.arrow.flatbuf.Field.addName(builderWrapper.getInternalBuilder(), nameOffset);
     }
-    org.apache.arrow.flatbuf.Field.addNullable(builder, isNullable());
-    org.apache.arrow.flatbuf.Field.addTypeType(builder, getType().getTypeID().getFlatbufID());
-    org.apache.arrow.flatbuf.Field.addType(builder, typeOffset);
-    org.apache.arrow.flatbuf.Field.addChildren(builder, childrenOffset);
-    org.apache.arrow.flatbuf.Field.addCustomMetadata(builder, metadataOffset);
+    org.apache.arrow.flatbuf.Field.addNullable(builderWrapper.getInternalBuilder(), isNullable());
+    org.apache.arrow.flatbuf.Field
+        .addTypeType(builderWrapper.getInternalBuilder(), getType().getTypeID().getFlatbufID());
+    org.apache.arrow.flatbuf.Field.addType(builderWrapper.getInternalBuilder(), typeOffset);
+    org.apache.arrow.flatbuf.Field.addChildren(builderWrapper.getInternalBuilder(), childrenOffset);
+    org.apache.arrow.flatbuf.Field.addCustomMetadata(builderWrapper.getInternalBuilder(), metadataOffset);
     if (dictionary != null) {
-      org.apache.arrow.flatbuf.Field.addDictionary(builder, dictionaryOffset);
+      org.apache.arrow.flatbuf.Field.addDictionary(builderWrapper.getInternalBuilder(), dictionaryOffset);
     }
-    return org.apache.arrow.flatbuf.Field.endField(builder);
+    return org.apache.arrow.flatbuf.Field.endField(builderWrapper.getInternalBuilder());
   }
 
   public String getName() {

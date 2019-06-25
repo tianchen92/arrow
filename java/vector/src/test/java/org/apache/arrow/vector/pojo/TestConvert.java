@@ -28,9 +28,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.arrow.FlatBufferBuilderWrapper;
 import org.apache.arrow.memory.BufferAllocator;
 import org.apache.arrow.memory.RootAllocator;
-import org.apache.arrow.shaded.com.google.flatbuffers.FlatBufferBuilder;
 import org.apache.arrow.util.Collections2;
 import org.apache.arrow.vector.complex.FixedSizeListVector;
 import org.apache.arrow.vector.complex.ListVector;
@@ -85,9 +85,10 @@ public class TestConvert {
     Field initialField = new Field("a", FieldType.nullable(Struct.INSTANCE), children);
     java.util.List<Field> parent = new ArrayList<>();
     parent.add(initialField);
-    FlatBufferBuilder builder = new FlatBufferBuilder();
-    builder.finish(initialField.getField(builder));
-    org.apache.arrow.flatbuf.Field flatBufField = org.apache.arrow.flatbuf.Field.getRootAsField(builder.dataBuffer());
+    FlatBufferBuilderWrapper builderWrapper = new FlatBufferBuilderWrapper();
+    builderWrapper.getInternalBuilder().finish(initialField.getField(builderWrapper));
+    org.apache.arrow.flatbuf.Field flatBufField = org.apache.arrow.flatbuf.Field
+        .getRootAsField(builderWrapper.getInternalBuilder().dataBuffer());
     Field finalField = Field.convertField(flatBufField);
     assertEquals(initialField, finalField);
     assertFalse(finalField.toString().contains("[DEFAULT]"));
@@ -97,11 +98,12 @@ public class TestConvert {
     String modifiedSchema = jsonSchema.replace("$data$", "[DEFAULT]");
 
     Schema tempSchema = Schema.fromJSON(modifiedSchema);
-    FlatBufferBuilder schemaBuilder = new FlatBufferBuilder();
+    FlatBufferBuilderWrapper schemaBuilderWrapper = new FlatBufferBuilderWrapper();
     org.apache.arrow.vector.types.pojo.Schema schema =
         new org.apache.arrow.vector.types.pojo.Schema(tempSchema.getFields());
-    schemaBuilder.finish(schema.getSchema(schemaBuilder));
-    Schema finalSchema = Schema.deserialize(ByteBuffer.wrap(schemaBuilder.sizedByteArray()));
+    schemaBuilderWrapper.getInternalBuilder().finish(schema.getSchema(schemaBuilderWrapper));
+    Schema finalSchema =
+        Schema.deserialize(ByteBuffer.wrap(schemaBuilderWrapper.getInternalBuilder().sizedByteArray()));
     assertFalse(finalSchema.toString().contains("[DEFAULT]"));
   }
 
@@ -150,18 +152,19 @@ public class TestConvert {
   }
 
   private void run(Field initialField) {
-    FlatBufferBuilder builder = new FlatBufferBuilder();
-    builder.finish(initialField.getField(builder));
-    org.apache.arrow.flatbuf.Field flatBufField = org.apache.arrow.flatbuf.Field.getRootAsField(builder.dataBuffer());
+    FlatBufferBuilderWrapper builderWrapper = new FlatBufferBuilderWrapper();
+    builderWrapper.getInternalBuilder().finish(initialField.getField(builderWrapper));
+    org.apache.arrow.flatbuf.Field flatBufField =
+        org.apache.arrow.flatbuf.Field.getRootAsField(builderWrapper.getInternalBuilder().dataBuffer());
     Field finalField = Field.convertField(flatBufField);
     assertEquals(initialField, finalField);
   }
 
   private void run(Schema initialSchema) {
-    FlatBufferBuilder builder = new FlatBufferBuilder();
-    builder.finish(initialSchema.getSchema(builder));
+    FlatBufferBuilderWrapper builderWrapper = new FlatBufferBuilderWrapper();
+    builderWrapper.getInternalBuilder().finish(initialSchema.getSchema(builderWrapper));
     org.apache.arrow.flatbuf.Schema flatBufSchema =
-        org.apache.arrow.flatbuf.Schema.getRootAsSchema(builder.dataBuffer());
+        org.apache.arrow.flatbuf.Schema.getRootAsSchema(builderWrapper.getInternalBuilder().dataBuffer());
     Schema finalSchema = Schema.convertSchema(flatBufSchema);
     assertEquals(initialSchema, finalSchema);
   }
